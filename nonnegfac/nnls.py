@@ -235,7 +235,7 @@ def nnlsm_activeset(A, B, overwrite=False, is_input_prod=False, init=None):
             alpha[:] = np.inf
             alpha[(ix0, ix1_subsub)] = X_infea / (X_infea - Z[(ix0, ix1_sub)])
             min_ix = np.argmin(alpha, axis=0)
-            min_vals = alpha[(min_ix, range(0, alpha.shape[1]))]
+            min_vals = alpha[(min_ix, list(range(0, alpha.shape[1])))]
 
             X[:, infea_cols] = X[:, infea_cols] + \
                 (Z[:, infea_subcols] - X[:, infea_cols]) * min_vals
@@ -396,7 +396,7 @@ def column_group_sub(B, i, cols):
 
 
 def _test_column_grouping(m=10, n=5000, num_repeat=5, verbose=False):
-    print '\nTesting column_grouping ...'
+    print('\nTesting column_grouping ...')
     A = np.array([[True, False, False, False, False],
                   [True, True, False, True, True]])
     grps1 = _column_group_loop(A)
@@ -404,10 +404,10 @@ def _test_column_grouping(m=10, n=5000, num_repeat=5, verbose=False):
     grps3 = [np.array([0]),
              np.array([1, 3, 4]),
              np.array([2])]
-    print 'OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps2)]) else 'Fail'
-    print 'OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps3)]) else 'Fail'
+    print('OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps2)]) else 'Fail')
+    print('OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps3)]) else 'Fail')
 
-    for i in xrange(0, num_repeat):
+    for i in range(0, num_repeat):
         A = np.random.rand(m, n)
         B = A > 0.5
         start = time.time()
@@ -417,9 +417,9 @@ def _test_column_grouping(m=10, n=5000, num_repeat=5, verbose=False):
         grps2 = _column_group_recursive(B)
         elapsed_recursive = time.time() - start
         if verbose:
-            print 'Loop     :', elapsed_loop
-            print 'Recursive:', elapsed_recursive
-        print 'OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps2)]) else 'Fail'
+            print('Loop     :', elapsed_loop)
+            print('Recursive:', elapsed_recursive)
+        print('OK' if all([np.array_equal(a, b) for (a, b) in zip(grps1, grps2)]) else 'Fail')
     # sorted_idx = np.concatenate(grps)
     # print B
     # print sorted_idx
@@ -428,8 +428,8 @@ def _test_column_grouping(m=10, n=5000, num_repeat=5, verbose=False):
 
 
 def _test_normal_eq_comb(m=10, k=3, num_repeat=5):
-    print '\nTesting normal_eq_comb() ...'
-    for i in xrange(0, num_repeat):
+    print('\nTesting normal_eq_comb() ...')
+    for i in range(0, num_repeat):
         A = np.random.rand(2 * m, m)
         X = np.random.rand(m, k)
         C = (np.random.rand(m, k) > 0.5)
@@ -438,18 +438,18 @@ def _test_normal_eq_comb(m=10, k=3, num_repeat=5):
         B = A.T.dot(B)
         A = A.T.dot(A)
         Sol, a, b = normal_eq_comb(A, B, C)
-        print 'OK' if np.allclose(X, Sol) else 'Fail'
+        print('OK' if np.allclose(X, Sol) else 'Fail')
     return
 
 
 def _test_nnlsm():
-    print '\nTesting nnls routines ...'
+    print('\nTesting nnls routines ...')
     m = 100
     n = 10
     k = 200
     rep = 5
 
-    for r in xrange(0, rep):
+    for r in range(0, rep):
         A = np.random.rand(m, n)
         X_org = np.random.rand(n, k)
         X_org[np.random.rand(n, k) < 0.5] = 0
@@ -465,33 +465,33 @@ def _test_nnlsm():
         C1, info = nnlsm_blockpivot(A, B)
         elapsed2 = time.time() - start
         rel_norm2 = nla.norm(C1 - X_org) / nla.norm(X_org)
-        print 'nnlsm_blockpivot:    ', 'OK  ' if info[0] else 'Fail',\
-            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed2, rel_norm2)
+        print('nnlsm_blockpivot:    ', 'OK  ' if info[0] else 'Fail',\
+            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed2, rel_norm2))
 
         start = time.time()
         C2, info = nnlsm_activeset(A, B)
         num_backup = 0
         elapsed1 = time.time() - start
         rel_norm1 = nla.norm(C2 - X_org) / nla.norm(X_org)
-        print 'nnlsm_activeset:     ', 'OK  ' if info[0] else 'Fail',\
-            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed1, rel_norm1)
+        print('nnlsm_activeset:     ', 'OK  ' if info[0] else 'Fail',\
+            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed1, rel_norm1))
 
         import scipy.optimize as opt
         start = time.time()
         C3 = np.zeros([n, k])
-        for i in xrange(0, k):
+        for i in range(0, k):
             res = opt.nnls(A, B[:, i])
             C3[:, i] = res[0]
         elapsed3 = time.time() - start
         rel_norm3 = nla.norm(C3 - X_org) / nla.norm(X_org)
-        print 'scipy.optimize.nnls: ', 'OK  ',\
-            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed3, rel_norm3)
+        print('scipy.optimize.nnls: ', 'OK  ',\
+            'elapsed:{0:.4f} error:{1:.4e}'.format(elapsed3, rel_norm3))
 
         if num_backup > 0:
             break
         if rel_norm1 > 10e-5 or rel_norm2 > 10e-5 or rel_norm3 > 10e-5:
             break
-        print ''
+        print('')
 
 if __name__ == '__main__':
     _test_column_grouping()
